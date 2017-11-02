@@ -1,0 +1,1085 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1182</width>
+    <height>783</height>
+   </rect>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>5000</width>
+    <height>3000</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>GoldExt</string>
+  </property>
+  <property name="layoutDirection">
+   <enum>Qt::LeftToRight</enum>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: rgb(55, 55, 55);</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <property name="acceptDrops">
+    <bool>false</bool>
+   </property>
+   <widget class="QGraphicsView" name="imageLoaderView">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>701</width>
+      <height>700</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>500</width>
+      <height>500</height>
+     </size>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>4000</width>
+      <height>2000</height>
+     </size>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">border-color: rgb(0, 255, 0);</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="openSavedStateButton">
+    <property name="geometry">
+     <rect>
+      <x>740</x>
+      <y>10</y>
+      <width>111</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>8</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(0, 255, 0);
+border-color: rgb(200, 168, 8);</string>
+    </property>
+    <property name="text">
+     <string>Open Saved State</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="polygonAreaRadioButton">
+    <property name="geometry">
+     <rect>
+      <x>740</x>
+      <y>70</y>
+      <width>251</width>
+      <height>32</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>8</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(0, 255, 0);</string>
+    </property>
+    <property name="text">
+     <string>Draw Polygon Outline</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="polygonAreaEndingRadioButton">
+    <property name="geometry">
+     <rect>
+      <x>740</x>
+      <y>110</y>
+      <width>251</width>
+      <height>32</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>8</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(0, 255, 0);</string>
+    </property>
+    <property name="text">
+     <string>Connect Polygon Endings</string>
+    </property>
+   </widget>
+   <widget class="QLCDNumber" name="internalGoldParticleLcdNumber">
+    <property name="geometry">
+     <rect>
+      <x>1040</x>
+      <y>310</y>
+      <width>64</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>4</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(0, 170, 0);
+color: rgb(255, 255, 255);</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="saveStateButton">
+    <property name="geometry">
+     <rect>
+      <x>1010</x>
+      <y>10</y>
+      <width>121</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>8</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(0, 255, 0);
+border-color: rgb(200, 168, 8);</string>
+    </property>
+    <property name="text">
+     <string>Save State</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="internalGoldParticleNumber">
+    <property name="geometry">
+     <rect>
+      <x>740</x>
+      <y>310</y>
+      <width>291</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>8</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(0, 255, 0);</string>
+    </property>
+    <property name="text">
+     <string># of gold particles within the polygon</string>
+    </property>
+   </widget>
+   <widget class="QLCDNumber" name="backgroundGoldParticleLcdNumber">
+    <property name="geometry">
+     <rect>
+      <x>1040</x>
+      <y>410</y>
+      <width>64</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>4</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(255, 0, 255);
+color: rgb(255, 255, 255);</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="backgroundGoldParticleNumber">
+    <property name="geometry">
+     <rect>
+      <x>740</x>
+      <y>410</y>
+      <width>291</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>8</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(255, 0, 255);</string>
+    </property>
+    <property name="text">
+     <string># of background gold particles</string>
+    </property>
+   </widget>
+   <widget class="QDoubleSpinBox" name="densityDoubleSpinBox">
+    <property name="geometry">
+     <rect>
+      <x>740</x>
+      <y>160</y>
+      <width>111</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>8</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(0, 255, 0);</string>
+    </property>
+    <property name="decimals">
+     <number>0</number>
+    </property>
+    <property name="minimum">
+     <double>0.000000000000000</double>
+    </property>
+    <property name="maximum">
+     <double>2000.000000000000000</double>
+    </property>
+    <property name="singleStep">
+     <double>100.000000000000000</double>
+    </property>
+    <property name="value">
+     <double>300.000000000000000</double>
+    </property>
+   </widget>
+   <widget class="QLabel" name="densityLabel">
+    <property name="geometry">
+     <rect>
+      <x>870</x>
+      <y>160</y>
+      <width>131</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>8</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(0, 255, 0);</string>
+    </property>
+    <property name="text">
+     <string>AZ Density </string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="populateSynapticAreaButton">
+    <property name="geometry">
+     <rect>
+      <x>1010</x>
+      <y>150</y>
+      <width>151</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>8</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(0, 255, 0);
+border-color: rgb(200, 168, 8);</string>
+    </property>
+    <property name="text">
+     <string>Populate Synaptic Area</string>
+    </property>
+   </widget>
+   <widget class="QDoubleSpinBox" name="backgroundDensityDoubleSpinBox">
+    <property name="geometry">
+     <rect>
+      <x>740</x>
+      <y>260</y>
+      <width>111</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>8</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(255, 0, 255);</string>
+    </property>
+    <property name="decimals">
+     <number>0</number>
+    </property>
+    <property name="minimum">
+     <double>0.000000000000000</double>
+    </property>
+    <property name="maximum">
+     <double>100.000000000000000</double>
+    </property>
+    <property name="singleStep">
+     <double>1.000000000000000</double>
+    </property>
+    <property name="value">
+     <double>0.000000000000000</double>
+    </property>
+   </widget>
+   <widget class="QLabel" name="backgroundDensityLabel">
+    <property name="geometry">
+     <rect>
+      <x>870</x>
+      <y>260</y>
+      <width>121</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>8</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(255, 0, 255);</string>
+    </property>
+    <property name="text">
+     <string>Background Density </string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="populateBackgroundAreaButton">
+    <property name="geometry">
+     <rect>
+      <x>1010</x>
+      <y>250</y>
+      <width>151</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>8</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(255, 0, 255);</string>
+    </property>
+    <property name="text">
+     <string>Populate Background</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="clusteringLabel">
+    <property name="geometry">
+     <rect>
+      <x>740</x>
+      <y>460</y>
+      <width>371</width>
+      <height>33</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(0, 255, 0);</string>
+    </property>
+    <property name="text">
+     <string>Measure selection</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="clearSceneButton">
+    <property name="geometry">
+     <rect>
+      <x>1010</x>
+      <y>70</y>
+      <width>121</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>8</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(255, 0, 0);</string>
+    </property>
+    <property name="text">
+     <string>Clear Scene</string>
+    </property>
+   </widget>
+   <widget class="QTabWidget" name="tabWidget">
+    <property name="geometry">
+     <rect>
+      <x>740</x>
+      <y>510</y>
+      <width>371</width>
+      <height>201</height>
+     </rect>
+    </property>
+    <property name="currentIndex">
+     <number>0</number>
+    </property>
+    <widget class="QWidget" name="tab_3">
+     <attribute name="title">
+      <string>Distance measurements</string>
+     </attribute>
+     <widget class="QPushButton" name="generateRandomDataButton">
+      <property name="geometry">
+       <rect>
+        <x>70</x>
+        <y>50</y>
+        <width>111</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>8</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">color: rgb(0, 255, 0);
+border-color: rgb(200, 168, 8);</string>
+      </property>
+      <property name="text">
+       <string>Generate</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="randomDataGeneratorLabel">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>291</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>8</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">color: rgb(0, 255, 0);</string>
+      </property>
+      <property name="text">
+       <string>Generate Random Data</string>
+      </property>
+     </widget>
+     <widget class="QDoubleSpinBox" name="randomDataSampleDoubleSpinBox">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>50</y>
+        <width>51</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>8</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(0, 255, 0);</string>
+      </property>
+      <property name="decimals">
+       <number>0</number>
+      </property>
+      <property name="minimum">
+       <double>1.000000000000000</double>
+      </property>
+      <property name="maximum">
+       <double>1000.000000000000000</double>
+      </property>
+      <property name="singleStep">
+       <double>10.000000000000000</double>
+      </property>
+      <property name="value">
+       <double>50.000000000000000</double>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="PerformSpatialAutocorrelationCheckBox">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>100</y>
+        <width>151</width>
+        <height>32</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>8</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">color: rgb(0, 255, 0);</string>
+      </property>
+      <property name="text">
+       <string>2D ACF</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tab_5">
+     <attribute name="title">
+      <string>2D ACF</string>
+     </attribute>
+     <widget class="QPushButton" name="performSpatialAutocorrelationButton">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>111</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>8</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">color: rgb(0, 255, 0);
+border-color: rgb(200, 168, 8);</string>
+      </property>
+      <property name="text">
+       <string>2D ACF</string>
+      </property>
+     </widget>
+     <widget class="QSpinBox" name="spatialRmaxSpinBox">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>70</y>
+        <width>111</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>8</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">color: rgb(0, 255, 0);</string>
+      </property>
+      <property name="minimum">
+       <number>1</number>
+      </property>
+      <property name="maximum">
+       <number>10000</number>
+      </property>
+      <property name="singleStep">
+       <number>10</number>
+      </property>
+      <property name="value">
+       <number>80</number>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="SaveSpatialAutocorrelationCheckBox">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>20</y>
+        <width>81</width>
+        <height>32</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>8</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">color: rgb(0, 255, 0);</string>
+      </property>
+      <property name="text">
+       <string>Save</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="RmaxLabel">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>70</y>
+        <width>131</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>8</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">color: rgb(0, 255, 0);</string>
+      </property>
+      <property name="text">
+       <string>Rmax (nm)</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="DBSCANTab">
+     <attribute name="title">
+      <string>DB</string>
+     </attribute>
+     <widget class="QPushButton" name="performDBSCANButton">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>111</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>8</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">color: rgb(0, 255, 0);
+border-color: rgb(200, 168, 8);</string>
+      </property>
+      <property name="text">
+       <string>DBSCAN</string>
+      </property>
+     </widget>
+     <widget class="QDoubleSpinBox" name="DBSCANEpsilonDoubleSpinBox">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>70</y>
+        <width>111</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>8</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">color: rgb(0, 255, 0);</string>
+      </property>
+      <property name="decimals">
+       <number>2</number>
+      </property>
+      <property name="minimum">
+       <double>0.010000000000000</double>
+      </property>
+      <property name="maximum">
+       <double>500.000000000000000</double>
+      </property>
+      <property name="singleStep">
+       <double>10.000000000000000</double>
+      </property>
+      <property name="value">
+       <double>40.000000000000000</double>
+      </property>
+     </widget>
+     <widget class="QLabel" name="DBSCANEpsilonLabel">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>70</y>
+        <width>101</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>8</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">color: rgb(0, 255, 0);</string>
+      </property>
+      <property name="text">
+       <string>Epsilon (nm)</string>
+      </property>
+     </widget>
+     <widget class="QDoubleSpinBox" name="DBSCANMinSampleDoubleSpinBox">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>120</y>
+        <width>111</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>8</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">color: rgb(0, 255, 0);</string>
+      </property>
+      <property name="decimals">
+       <number>0</number>
+      </property>
+      <property name="minimum">
+       <double>1.000000000000000</double>
+      </property>
+      <property name="maximum">
+       <double>5000.000000000000000</double>
+      </property>
+      <property name="singleStep">
+       <double>1.000000000000000</double>
+      </property>
+      <property name="value">
+       <double>3.000000000000000</double>
+      </property>
+     </widget>
+     <widget class="QLabel" name="DBSCANMinSampleLabel">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>120</y>
+        <width>101</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>8</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">color: rgb(0, 255, 0);</string>
+      </property>
+      <property name="text">
+       <string>Min Sample</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="AP">
+     <attribute name="title">
+      <string>AP</string>
+     </attribute>
+     <widget class="QPushButton" name="performAffinityPropagationButton">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>111</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>8</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">color: rgb(0, 255, 0);
+border-color: rgb(200, 168, 8);</string>
+      </property>
+      <property name="text">
+       <string>Affinity Propagation</string>
+      </property>
+     </widget>
+     <widget class="QDoubleSpinBox" name="affinityPropagationDoubleSpinBox">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>70</y>
+        <width>111</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>8</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">color: rgb(0, 255, 0);</string>
+      </property>
+      <property name="decimals">
+       <number>0</number>
+      </property>
+      <property name="minimum">
+       <double>-10000.000000000000000</double>
+      </property>
+      <property name="maximum">
+       <double>0.000000000000000</double>
+      </property>
+      <property name="singleStep">
+       <double>10.000000000000000</double>
+      </property>
+      <property name="value">
+       <double>-30.000000000000000</double>
+      </property>
+     </widget>
+     <widget class="QLabel" name="affinityPropagationLabel">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>70</y>
+        <width>101</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>8</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">color: rgb(0, 255, 0);</string>
+      </property>
+      <property name="text">
+       <string>Preference</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="tab">
+     <attribute name="title">
+      <string>MS</string>
+     </attribute>
+     <widget class="QPushButton" name="performMeanShiftButton">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>111</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>8</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">color: rgb(0, 255, 0);
+border-color: rgb(200, 168, 8);</string>
+      </property>
+      <property name="text">
+       <string>Mean shift</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="MeanShiftMinSampleLabel">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>70</y>
+        <width>81</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>8</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">color: rgb(0, 255, 0);</string>
+      </property>
+      <property name="text">
+       <string>Min Sample</string>
+      </property>
+     </widget>
+     <widget class="QDoubleSpinBox" name="MeanShiftMinSampleDoubleSpinBox">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>70</y>
+        <width>111</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>8</pointsize>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">color: rgb(0, 255, 0);</string>
+      </property>
+      <property name="decimals">
+       <number>0</number>
+      </property>
+      <property name="minimum">
+       <double>1.000000000000000</double>
+      </property>
+      <property name="maximum">
+       <double>5000.000000000000000</double>
+      </property>
+      <property name="singleStep">
+       <double>1.000000000000000</double>
+      </property>
+      <property name="value">
+       <double>3.000000000000000</double>
+      </property>
+     </widget>
+    </widget>
+   </widget>
+   <widget class="QDoubleSpinBox" name="numberOfInternalPolygonsDoubleSpinBox">
+    <property name="geometry">
+     <rect>
+      <x>880</x>
+      <y>20</y>
+      <width>81</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>8</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(0, 255, 0);</string>
+    </property>
+    <property name="decimals">
+     <number>0</number>
+    </property>
+    <property name="minimum">
+     <double>0.000000000000000</double>
+    </property>
+    <property name="maximum">
+     <double>100.000000000000000</double>
+    </property>
+    <property name="singleStep">
+     <double>1.000000000000000</double>
+    </property>
+    <property name="value">
+     <double>1.000000000000000</double>
+    </property>
+   </widget>
+   <widget class="QLabel" name="AZBackgroundGoldParticleNumber">
+    <property name="geometry">
+     <rect>
+      <x>740</x>
+      <y>360</y>
+      <width>291</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>8</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(255, 255, 0);</string>
+    </property>
+    <property name="text">
+     <string># of AZ background gold particles</string>
+    </property>
+   </widget>
+   <widget class="QLCDNumber" name="AZBackgroundGoldParticleLcdNumber">
+    <property name="geometry">
+     <rect>
+      <x>1040</x>
+      <y>360</y>
+      <width>64</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>4</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(0, 0, 0);
+background-color: rgb(255, 255, 0);</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="populateAZBackgroundButton">
+    <property name="geometry">
+     <rect>
+      <x>1010</x>
+      <y>200</y>
+      <width>151</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>8</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(255, 255, 0);</string>
+    </property>
+    <property name="text">
+     <string>Populate AZ background</string>
+    </property>
+   </widget>
+   <widget class="QDoubleSpinBox" name="AZBackgroundDensityDoubleSpinBox">
+    <property name="geometry">
+     <rect>
+      <x>740</x>
+      <y>210</y>
+      <width>111</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>8</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(255, 255, 0);</string>
+    </property>
+    <property name="decimals">
+     <number>0</number>
+    </property>
+    <property name="minimum">
+     <double>0.000000000000000</double>
+    </property>
+    <property name="maximum">
+     <double>2000.000000000000000</double>
+    </property>
+    <property name="singleStep">
+     <double>1.000000000000000</double>
+    </property>
+    <property name="value">
+     <double>0.000000000000000</double>
+    </property>
+   </widget>
+   <widget class="QLabel" name="AZBackgroundDensityLabel">
+    <property name="geometry">
+     <rect>
+      <x>870</x>
+      <y>210</y>
+      <width>131</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>8</pointsize>
+     </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(255, 255, 0);</string>
+    </property>
+    <property name="text">
+     <string>AZ Background Density </string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionOpen">
+   <property name="text">
+    <string>Open</string>
+   </property>
+  </action>
+  <action name="actionQuit">
+   <property name="text">
+    <string>Quit</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
