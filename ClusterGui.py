@@ -16,7 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
-from PyQt4 import QtCore, QtGui, uic
+from PyQt5 import QtCore, QtWidgets, uic, QtGui
 import MainGUI
 import GenerateArtificialData
 import matplotlib.path as mPath
@@ -33,14 +33,15 @@ from xlsxwriter.utility import xl_rowcol_to_cell
 import random
 
 # defining the GUI drawn in Qt Desinger
-qtGoldExtClusterGui = '.\\GoldExt_GUI_Cluster.ui'
+qtGoldExtClusterGui = './GoldExt_GUI_Cluster.ui'
 
 Ui_MainWindow, QtBaseClass = uic.loadUiType(qtGoldExtClusterGui)
 
-class GoldExtClusterGui(QtGui.QMainWindow, Ui_MainWindow):
+#class GoldExtClusterGui(QtGui.QMainWindow, Ui_MainWindow):
+class GoldExtClusterGui(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def __init__(self):
-        QtGui.QMainWindow.__init__(self)
+        QtWidgets.QMainWindow.__init__(self)
         Ui_MainWindow.__init__(self)
         self.setupUi(self)
 
@@ -75,6 +76,10 @@ class GoldExtClusterGui(QtGui.QMainWindow, Ui_MainWindow):
         self.polygonAreaGoldParticlesPerAreaList = []
         self.polygonAreaList = []
 
+        self.randomGoldParticlesInPolygonItemList = []
+        self.randomAZBackgroundParticlesItemList = []
+        self.randomBackgroundParticlesItemList = []
+
         self.allSmallPercNND = []
         self.allSmallPercFull = []
         self.allSmallNNDMatrix = []
@@ -105,18 +110,19 @@ class GoldExtClusterGui(QtGui.QMainWindow, Ui_MainWindow):
 
     def redrawFromMainGui(self):
         # setting a grapchics scene with appropriate size
-        self.scene = QtGui.QGraphicsScene(0, 0, 690, 650)
+        self.scene = QtWidgets.QGraphicsScene(0, 0, 690, 650)
         # making the image scalable with the mouse wheel
         self.scene.wheelEvent = self.zoomWithWheel
         # adding the rescaled image to the graphics scene
         self.scene.addPixmap(MainGUI.imgScaled)
         # visualizing the scene
         self.imageLoaderView.setScene(self.scene)
-        self.imgItem = QtGui.QGraphicsPixmapItem(MainGUI.imgScaled, None, self.scene)
+        self.imgItem = QtWidgets.QGraphicsPixmapItem(MainGUI.imgScaled, None) #, self.scene)
+        self.scene.addItem(self.imgItem)
         # redrawing scalebar from the previous image
         scalebarLine = QtCore.QLineF(MainGUI.globalScalebarPoints[0].x(), MainGUI.globalScalebarPoints[0].y(), MainGUI.globalScalebarPoints[1].x(), MainGUI.globalScalebarPoints[1].y())
         self.scene.addLine(scalebarLine, QtGui.QPen(QtCore.Qt.red))
-        scaleBarString = QtCore.QString('%0.0f nm' % MainGUI.globalScalebarValue)
+        scaleBarString = str('%0.0f nm' % MainGUI.globalScalebarValue)
         printedScalebar = self.scene.addText(scaleBarString, QtGui.QFont('', 12))
         # setting the position of the scalebar
         printedScalebar.setPos(MainGUI.globalScalebarPoints[0].x(), MainGUI.globalScalebarPoints[0].y())
@@ -155,8 +161,8 @@ class GoldExtClusterGui(QtGui.QMainWindow, Ui_MainWindow):
         self.polygonAreaRadioButton.setEnabled(0)
         self.polygonAreaOutlinePoints.append(event.pos())
         if(len(self.polygonAreaOutlinePoints) > 1):
-            tmpLineItem = QtGui.QGraphicsLineItem(QtCore.QLineF(self.polygonAreaOutlinePoints[-2], self.polygonAreaOutlinePoints[-1]))
-            self.scene.addItem(tmpLineItem)
+            #tmpLineItem = QtWidgets.QGraphicsLineItem(QtCore.QLineF(self.polygonAreaOutlinePoints[-2], self.polygonAreaOutlinePoints[-1]))
+            self.scene.addItem(QtWidgets.QGraphicsLineItem(QtCore.QLineF(self.polygonAreaOutlinePoints[-2], self.polygonAreaOutlinePoints[-1])))
         if(len(self.polygonAreaOutlinePoints) > 2):
             self.polygonAreaEndingRadioButton.setEnabled(1)
 
@@ -176,7 +182,7 @@ class GoldExtClusterGui(QtGui.QMainWindow, Ui_MainWindow):
             self.createPathOfPolygonArea(self.internalPolygonList)
 
     def drawPolygon(self, arrayOfPoints):
-        tmpPolygon = QtGui.QGraphicsPolygonItem()
+        tmpPolygon = QtWidgets.QGraphicsPolygonItem()
         tmpPolygon.setPolygon(QtGui.QPolygonF(arrayOfPoints))
         self.scene.addItem(tmpPolygon)
         tmpPolygon.setPen(QtGui.QPen(QtCore.Qt.yellow, 1))
@@ -198,8 +204,8 @@ class GoldExtClusterGui(QtGui.QMainWindow, Ui_MainWindow):
             polyAreaToPopulateInUm = polyAreaToPopulate/(MainGUI.nmPixelRatio**2)/1e6
             self.internalPolygonAreaList.append(polyAreaToPopulateInUm)
             self.polygonAreaList.append(polyAreaToPopulateInUm)
-            print '-----'
-            print 'Internal polygon area: %0.5f um2' % polyAreaToPopulateInUm
+            print ('-----')
+            print ('Internal polygon area: %0.5f um2' % polyAreaToPopulateInUm)
             self.polygonAreaOutlinePath = []
             pathInUm = []
 
@@ -258,7 +264,7 @@ class GoldExtClusterGui(QtGui.QMainWindow, Ui_MainWindow):
             while dataPointCounter < self.polygonAreaGoldParticlesPerAreaList[i]:
                 tmpRandomParticles = GenerateArtificialData.generateSetOfRandomDataPoints(realPolyPath[i], None,  True, 1, 10*MainGUI.nmPixelRatio, realPolyPath[i].get_extents().x0, realPolyPath[i].get_extents().x1, realPolyPath[i].get_extents().y0, realPolyPath[i].get_extents().y1)
 
-                tmpDistanceVec = ([])
+                tmpDistanceVec = np.array([])
                 for q in range(0, len(self.randomGoldParticlesInPolygon)):
                     tmpDistanceVec = np.append(tmpDistanceVec, DistanceCalculations.distance(self.randomGoldParticlesInPolygon[q], tmpRandomParticles[-1]))
 
@@ -274,7 +280,7 @@ class GoldExtClusterGui(QtGui.QMainWindow, Ui_MainWindow):
             j = random.randint(0, int(self.numberOfInternalPolygonsDoubleSpinBox.value())-1)
             tmpRandomParticles = GenerateArtificialData.generateSetOfRandomDataPoints(realPolyPath[j], None,  True, 1, 10*MainGUI.nmPixelRatio, realPolyPath[j].get_extents().x0, realPolyPath[j].get_extents().x1, realPolyPath[j].get_extents().y0, realPolyPath[j].get_extents().y1)
 
-            tmpDistanceVec = ([])
+            tmpDistanceVec = np.array([])
             for q in range(0, len(self.randomGoldParticlesInPolygon)):
                 tmpDistanceVec = np.append(tmpDistanceVec, DistanceCalculations.distance(self.randomGoldParticlesInPolygon[q], tmpRandomParticles[-1]))
             for q in range(0, len(self.randomAZBackgroundParticles)):
@@ -297,17 +303,18 @@ class GoldExtClusterGui(QtGui.QMainWindow, Ui_MainWindow):
         global trueAZDensity
         trueAZDensity = ((len(self.randomGoldParticlesInPolygon) + len(self.randomAZBackgroundParticles)) / MainGUI.AZarea)
 
-        print '-----'
-        print 'N = %0.0f random gold particles were generated in %0.3f seconds' % (totalNumberOfGoldParticlesToPlace, float(time.time() - start_time))
-        print 'True density within the AZ: %0.3f gold particles/um2' % trueAZDensity
-        print '-----'
+        print ('-----')
+        print ('N = %0.0f random gold particles were generated in %0.3f seconds' % (totalNumberOfGoldParticlesToPlace, float(time.time() - start_time)))
+        print ('True density within the AZ: %0.3f gold particles/um2' % trueAZDensity)
+        print ('-----')
 
     def createAZBackgroundLabelling(self):
         if(len(self.randomAZBackgroundParticles) > 0):
             for i in range(0, len(self.randomAZBackgroundParticles)):
                 p = self.randomAZBackgroundParticles[-1]
                 self.randomAZBackgroundParticles = np.delete(self.randomAZBackgroundParticles, -1)
-                self.scene.removeItem(self.scene.itemAt(p.x(), p.y()))
+                self.scene.removeItem(self.randomAZBackgroundParticlesItemList[-1])
+                del self.randomAZBackgroundParticlesItemList[-1]
             self.randomAZBackgroundParticles = []
 
         global numberOfAZBackgroundParticles
@@ -326,7 +333,7 @@ class GoldExtClusterGui(QtGui.QMainWindow, Ui_MainWindow):
         while dataPointCounter < numberOfAZBackgroundParticles:
             tmpRandomParticles = GenerateArtificialData.generateSetOfRandomDataPoints(MainGUI.realPath, realPolyPath, True, 1, 10*MainGUI.nmPixelRatio, MainGUI.realPath.get_extents().x0, MainGUI.realPath.get_extents().x1, MainGUI.realPath.get_extents().y0, MainGUI.realPath.get_extents().y1)
 
-            tmpDistanceVec = ([])
+            tmpDistanceVec = np.array([])
             for q in range(0, len(self.randomGoldParticlesInPolygon)):
                 tmpDistanceVec = np.append(tmpDistanceVec, DistanceCalculations.distance(self.randomGoldParticlesInPolygon[q], tmpRandomParticles[-1]))
             for q in range(0, len(self.randomAZBackgroundParticles)):
@@ -346,10 +353,10 @@ class GoldExtClusterGui(QtGui.QMainWindow, Ui_MainWindow):
         global trueAZDensity
         trueAZDensity = ((len(self.randomGoldParticlesInPolygon) + len(self.randomAZBackgroundParticles)) / MainGUI.AZarea)
 
-        print '-----'
-        print 'N = %0.0f random AZ background particles were generated in %0.3f seconds' % (numberOfAZBackgroundParticles, float(time.time() - start_time))
-        print 'True density within the AZ: %0.3f gold particles/um2' % trueAZDensity
-        print '-----'
+        print ('-----')
+        print ('N = %0.0f random AZ background particles were generated in %0.3f seconds' % (numberOfAZBackgroundParticles, float(time.time() - start_time)))
+        print ('True density within the AZ: %0.3f gold particles/um2' % trueAZDensity)
+        print ('-----')
 
     # generate random background labelling with a given density
     def createBackgroundLabelling(self):
@@ -357,7 +364,8 @@ class GoldExtClusterGui(QtGui.QMainWindow, Ui_MainWindow):
             for i in range(0, len(self.randomBackgroundParticles)):
                 p = self.randomBackgroundParticles[-1]
                 self.randomBackgroundParticles = np.delete(self.randomBackgroundParticles, -1)
-                self.scene.removeItem(self.scene.itemAt(p.x(), p.y()))
+                self.scene.removeItem(self.randomBackgroundParticlesItemList[-1])
+                del self.randomBackgroundParticlesItemList[-1]
             self.randomBackgroundParticles = []
 
         if(self.backgroundDensityDoubleSpinBox.value() == 0):
@@ -375,7 +383,7 @@ class GoldExtClusterGui(QtGui.QMainWindow, Ui_MainWindow):
         while dataPointCounter < numberOfBackgroundParticles:
             tmpRandomParticles = GenerateArtificialData.generateSetOfRandomDataPoints(MainGUI.realPath, None, False, 1, 10 * MainGUI.nmPixelRatio, 0, MainGUI.imgScaled.width(), 0, MainGUI.imgScaled.height())
 
-            tmpDistanceVec = ([])
+            tmpDistanceVec = np.array([])
             for q in range(0, len(self.randomGoldParticlesInPolygon)):
                 tmpDistanceVec = np.append(tmpDistanceVec, DistanceCalculations.distance(self.randomGoldParticlesInPolygon[q], tmpRandomParticles[-1]))
             for q in range(0, len(self.randomAZBackgroundParticles)):
@@ -397,26 +405,29 @@ class GoldExtClusterGui(QtGui.QMainWindow, Ui_MainWindow):
         global backgroundDensity
         backgroundDensity = (numberOfBackgroundParticles / MainGUI.totalArea)
 
-        print '-----'
-        print 'N = %0.0f random background particles were generated in %0.3f seconds' % (numberOfBackgroundParticles, float(time.time() - start_time))
-        print 'True density outside the AZ: %0.3f gold particles/um2' % backgroundDensity
+        print ('-----')
+        print ('N = %0.0f random background particles were generated in %0.3f seconds' % (numberOfBackgroundParticles, float(time.time() - start_time)))
+        print ('True density outside the AZ: %0.3f gold particles/um2' % backgroundDensity)
 
     # plot randomly generated data on the screen
     def visualizeRandomData(self, arrayOfPoints, color):
         for i in range(0, len(arrayOfPoints)):
             pointDiam = 4
-            tmpEllipse = QtGui.QGraphicsEllipseItem(arrayOfPoints[i].x()-pointDiam/2, arrayOfPoints[i].y()-pointDiam, pointDiam, pointDiam)
+            tmpEllipse = QtWidgets.QGraphicsEllipseItem(arrayOfPoints[i].x()-pointDiam/2, arrayOfPoints[i].y()-pointDiam, pointDiam, pointDiam)
             if(color == 1):
                 tmpEllipse.setPen(QtGui.QPen(QtCore.Qt.green, 2))
+                self.randomGoldParticlesInPolygonItemList.append(tmpEllipse)
             if(color == 2):
                 tmpEllipse.setPen(QtGui.QPen(QtCore.Qt.magenta, 2))
+                self.randomBackgroundParticlesItemList.append(tmpEllipse)
             if(color == 3):
                 tmpEllipse.setPen(QtGui.QPen(QtCore.Qt.yellow, 2))
+                self.randomAZBackgroundParticlesItemList.append(tmpEllipse)
             self.scene.addItem(tmpEllipse)
 
     def saveRandomState(self):
-        savedFileName = str(QtGui.QFileDialog.getSaveFileName(self, 'Save Random State', MainGUI.openedFilename[0:-4], 'GoldExt SaveState (*.gss)')) # QtCore.QDir.currentPath()
-        f = open(savedFileName, 'w')
+        savedFileName = (QtWidgets.QFileDialog.getSaveFileName(self, 'Save Random State', MainGUI.openedFilename[0][0:-4], 'GoldExt SaveState (*.gss)')) # QtCore.QDir.currentPath()
+        f = open(savedFileName[0], 'w')
 
         # searching for the longest array to store data
         maxLength = 0
@@ -490,10 +501,10 @@ class GoldExtClusterGui(QtGui.QMainWindow, Ui_MainWindow):
 
         # save data in a .gss file
         dataMatrix = np.transpose((np.asarray(dataMatrix)))
-        np.savetxt(savedFileName, dataMatrix, fmt='%s')
+        np.savetxt(savedFileName[0], dataMatrix, fmt='%s')
 
-        print '-----'
-        print 'State saved at %s' % savedFileName
+        print ('-----')
+        print ('State saved at %s' % savedFileName[0])
 
     def openSavedSate(self):
         self.clearScene()
@@ -502,9 +513,9 @@ class GoldExtClusterGui(QtGui.QMainWindow, Ui_MainWindow):
 
         global clusterOpenedFilename
 
-        clusterOpenedFilename = QtGui.QFileDialog.getOpenFileName(self, 'Open saved state', MainGUI.openedFilename[0:-4], 'GoldExt SavedState (*.gss)')
+        clusterOpenedFilename = QtWidgets.QFileDialog.getOpenFileName(self, 'Open saved state', MainGUI.openedFilename[0][0:-4], 'GoldExt SavedState (*.gss)')
 
-        f = open(clusterOpenedFilename, 'r')
+        f = open(clusterOpenedFilename[0], 'r')
         i = 0
         for line in f:
             row = line.split()
@@ -550,20 +561,20 @@ class GoldExtClusterGui(QtGui.QMainWindow, Ui_MainWindow):
         self.visualizeRandomData(self.randomBackgroundParticles, 2)
         self.AZBackgroundGoldParticleLcdNumber.display(len(self.randomAZBackgroundParticles))
         self.backgroundGoldParticleLcdNumber.display(len(self.randomBackgroundParticles))
-        print '-----'
-        print 'Saved state loaded succesfully'
+        print ('-----')
+        print ('Saved state loaded succesfully')
 
         trueAZDensity = ((len(self.randomGoldParticlesInPolygon) + len(self.randomAZBackgroundParticles)) / MainGUI.AZarea)
-        print '-----'
-        print 'True density within the AZ: %0.3f gold particles/um2' % trueAZDensity
-        print '-----'
+        print ('-----')
+        print ('True density within the AZ: %0.3f gold particles/um2' % trueAZDensity)
+        print ('-----')
 
     # generate random data within the whole AZ to compare with the artificially clustered data
     def generateRandomSmallData(self):
         self.tmpRandomSmall = []
         if((len(self.randomGoldParticlesInPolygon) + len(self.randomAZBackgroundParticles)) == 0):
-            print '-----'
-            print 'There are 0 random gold particles labelled, no distribution could be generated'
+            print ('-----')
+            print ('There are 0 random gold particles labelled, no distribution could be generated')
         else:
             # get_extents() function of a path returns the min and max values of x and y coordinates of the path
             self.tmpRandomSmall = GenerateArtificialData.generateSetOfRandomDataPoints(MainGUI.realPath, None, True, (len(self.randomGoldParticlesInPolygon) + len(self.randomAZBackgroundParticles)), 10*MainGUI.nmPixelRatio, MainGUI.realPath.get_extents().x0, MainGUI.realPath.get_extents().x1, MainGUI.realPath.get_extents().y0, MainGUI.realPath.get_extents().y1)
@@ -655,14 +666,14 @@ class GoldExtClusterGui(QtGui.QMainWindow, Ui_MainWindow):
                 self.ACF_radiusVec, tmp_g = Clustering.calculateSpatialAutocorrelationFunction(MainGUI.imgScaled, maskSize, self.tmpRandomSmall, rmax, MainGUI.nmPixelRatio, binSize, False, False, 1)
                 self.random_g_r.append(tmp_g)
 
-            print i+1, '/', int(self.randomDataSampleDoubleSpinBox.value()), 'done'
+            print (i+1, '/', int(self.randomDataSampleDoubleSpinBox.value()), 'done')
 
         # if spatial autocorrelation analysis performed on the random samples, save data
         if(self.PerformSpatialAutocorrelationCheckBox.isChecked() == True):
 
             # check if the 2D ACF is already calculated for the actual experimental data
             if(self.g_r == []):
-                print '-----'
+                print ('-----')
                 #print 'Please perform 2D autocorrelation calculation on actual experimental data first'
                 self.performSpatialAutocorrelation()
             else:
@@ -680,7 +691,7 @@ class GoldExtClusterGui(QtGui.QMainWindow, Ui_MainWindow):
             grIndex = DistanceCalculations.getElementIndex(expMeanGr, randomMeanGr)
 
             # Creating the Excel workbook in which data will be saved
-            workbookFilename = str(clusterOpenedFilename[0:-4]) + '_2D_ACF.xlsx'
+            workbookFilename = str(clusterOpenedFilename[0][0:-4]) + '_2D_ACF.xlsx'
             workbook = xw.Workbook(workbookFilename)
 
             self.ACF_radiusVec = self.ACF_radiusVec.tolist()
@@ -688,13 +699,13 @@ class GoldExtClusterGui(QtGui.QMainWindow, Ui_MainWindow):
             ExcelSave.saveDataInExcel_2D_ACF(workbook, self.ACF_radiusVec, self.g_r, self.random_g_r, expMeanGr, randomMeanGr, grIndex)
             workbook.close()
 
-            print '-----'
-            print 'Random 2D ACF data is saved at:', workbookFilename
+            print ('-----')
+            print ('Random 2D ACF data is saved at:', workbookFilename)
 
         self.saveData(self.allSmallNNDMatrix, self.allSmallFullMatrix)
 
-        print '-----'
-        print 'N = %0.0f random data sets were generated in %0.3f seconds' % (self.randomDataSampleDoubleSpinBox.value(), float(time.time() - start_time))
+        print ('-----')
+        print ('N = %0.0f random data sets were generated in %0.3f seconds' % (self.randomDataSampleDoubleSpinBox.value(), float(time.time() - start_time)))
 
     # computing the features of artificially clustered data
     def experimentalDataCalculations(self):
@@ -737,7 +748,7 @@ class GoldExtClusterGui(QtGui.QMainWindow, Ui_MainWindow):
     def saveData(self, allSmallNNDMatrix, allSmallFullMatrix):
 
         # Creating the Excel workbook in which data will be saved
-        workbookFilename = str(clusterOpenedFilename[0:-4]) + '_distance_measurements.xlsx'
+        workbookFilename = str(clusterOpenedFilename[0][0:-4]) + '_distance_measurements.xlsx'
         workbook = xw.Workbook(workbookFilename)
 
         # save data in excel file
@@ -774,8 +785,8 @@ class GoldExtClusterGui(QtGui.QMainWindow, Ui_MainWindow):
         ExcelSave.saveDataInExcel_distanceSummary(workbook, self.expSmallNNDMatrix, self.expSmallFullMatrix, self.centroidDistance, self.smallClosestEdgeDistance, self.randomNNDMean, self.randomAllDistanceMean, self.randomCentroidMean, self.randomClosestEdgeMean, NNDIndex, AllDistanceIndex, CentroidIndex, ClosestEdgeIndex, randomNNDMedian, randomAllDistanceMedian, randomCendtroidMedian, randomClosestEdgeMedian, self.polygonAreaList)
 
         workbook.close()
-        print '-----'
-        print 'Distance measurements data is saved at ', str(clusterOpenedFilename[0:-4]) + '_distance_measurements.xlsx'
+        print ('-----')
+        print ('Distance measurements data is saved at ', str(clusterOpenedFilename[0][0:-4]) + '_distance_measurements.xlsx')
 
     def performDBSCAN(self):
         # has to be converted to pixel, given in nm by GUI interaction
@@ -819,7 +830,7 @@ class GoldExtClusterGui(QtGui.QMainWindow, Ui_MainWindow):
 
         # transpose the matrix to have the data columnwise and save it with a '_affinity_propagation' suffix
         dataMatrix = np.transpose(np.asarray(dataMatrix))
-        filenameToSave = str(clusterOpenedFilename[0:-4]) + '_affinity_propagation_pref=' + str(int(self.affinityPropagationDoubleSpinBox.value())) + '.txt'
+        filenameToSave = str(clusterOpenedFilename[0][0:-4]) + '_affinity_propagation_pref=' + str(int(self.affinityPropagationDoubleSpinBox.value())) + '.txt'
         np.savetxt(filenameToSave, dataMatrix, fmt='%0.0f')
 
     def performMeanShift(self):
@@ -840,7 +851,7 @@ class GoldExtClusterGui(QtGui.QMainWindow, Ui_MainWindow):
 
         # transpose the matrix to have the data columnwise and save it with a '_mean_shift' suffix
         dataMatrix = np.transpose(np.asarray(dataMatrix))
-        filenameToSave = str(clusterOpenedFilename[0:-4]) + '_mean_shift_minSample=' + str(int(self.MeanShiftMinSampleDoubleSpinBox.value())) + '.txt'
+        filenameToSave = str(clusterOpenedFilename[0][0:-4]) + '_mean_shift_minSample=' + str(int(self.MeanShiftMinSampleDoubleSpinBox.value())) + '.txt'
         np.savetxt(filenameToSave, dataMatrix, fmt='%0.0f')
 
     def performSpatialAutocorrelation(self):
@@ -867,7 +878,7 @@ class GoldExtClusterGui(QtGui.QMainWindow, Ui_MainWindow):
 
 # main
 if __name__ == '__main__':
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     clusterWindow = GoldExtClusterGui()
     clusterWindow.show()
     app.exec_()

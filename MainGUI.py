@@ -18,35 +18,38 @@
 
 import sys
 import os.path
-from PyQt4 import QtCore, QtGui, uic
+from PyQt5 import QtCore, QtWidgets, uic, QtGui
 import GenerateArtificialData
 import DistanceCalculations
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.path as mPath
 from matplotlib.backends.backend_pdf import PdfPages
-import time
 from scipy import stats
 import xlsxwriter as xw
 from xlsxwriter.utility import xl_rowcol_to_cell
 import ExcelSave
 from ClusterGui import GoldExtClusterGui
+from BIvar import GoldExtBivar
+import pdb
+
 import Clustering
 
 # defining the GUI drawn in Qt Desinger
-qtGoldExtMainGui = '.\\GoldExt_GUI.ui'
+qtGoldExtMainGui = './GoldExt_GUI.ui'
 
 Ui_MainWindow, QtBaseClass = uic.loadUiType(qtGoldExtMainGui)
 
-class GoldExtMainGui(QtGui.QMainWindow, Ui_MainWindow):
+#class GoldExtMainGui(QtGui.QMainWindow, Ui_MainWindow):
+class GoldExtMainGui(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def __init__(self):
-        QtGui.QMainWindow.__init__(self)
+        QtWidgets.QMainWindow.__init__(self)
         Ui_MainWindow.__init__(self)
         self.setupUi(self)
 
         # setting a grapchics scene with appropriate size
-        self.scene = QtGui.QGraphicsScene(0, 0, 690, 650)
+        self.scene = QtWidgets.QGraphicsScene(0, 0, 690, 650)
         self.scene.wheelEvent = self.zoomWithWheel
 
         # button which calls the file dialog window by clicking on it
@@ -64,7 +67,14 @@ class GoldExtMainGui(QtGui.QMainWindow, Ui_MainWindow):
         self.performAffinityPropagationButton.clicked.connect(self.performAffinityPropagation)
         self.performMeanShiftButton.clicked.connect(self.performMeanShift)
         self.performSpatialAutocorrelationButton.clicked.connect(self.performSpatialAutocorrelation)
-
+        
+        #bivar prt
+        
+        self.markLargeGoldParticlesButton.clicked.connect(self.drawLargeGoldParticles)
+        self.deleteLastLargeGoldButton.clicked.connect(self.deleteLargeGoldParticles)
+        
+        
+        self.openBIvarAn.clicked.connect(self.openBivWindowGui)
         self.openClusteringGuiWindowButton.clicked.connect(self.openClusteringWindowGui)
 
         self.synapticAreaRadioButton.setEnabled(0)
@@ -77,9 +87,9 @@ class GoldExtMainGui(QtGui.QMainWindow, Ui_MainWindow):
         self.synapticAreaEndingRadioButton.clicked.connect(self.endOfPolygon)
         self.scalebarRadioButton.clicked.connect(self.makeImageDrawable)
         self.markSmallGoldParticlesButton.clicked.connect(self.drawSmallGoldParticles)
-        #self.markLargeGoldParticlesButton.clicked.connect(self.drawLargeGoldParticles)
+        self.markLargeGoldParticlesButton.clicked.connect(self.drawLargeGoldParticles)
         self.deleteLastSmallGoldButton.clicked.connect(self.deleteSmallGoldParticles)
-        #self.deleteLastLargeGoldButton.clicked.connect(self.deleteLargeGoldParticles)
+        self.deleteLastLargeGoldButton.clicked.connect(self.deleteLargeGoldParticles)
 
         # defining variables accessible in this class
         self.synapticAreaOutlinePoints = []
@@ -89,6 +99,8 @@ class GoldExtMainGui(QtGui.QMainWindow, Ui_MainWindow):
         self.largeGoldParticleCoordinates = []
         self.smallGoldParticleCoordinatesInUm = []
         self.largeGoldParticleCoordinatesInUm = []
+
+        self.smallGoldParticleItemList = []
 
         self.tmpRandomSmall = []
         self.tmpRandomLarge = []
@@ -135,7 +147,7 @@ class GoldExtMainGui(QtGui.QMainWindow, Ui_MainWindow):
 
     # function that deletes everything from the screen
     def clearScene(self):
-        self.recDir = openedFilename[0:-4]
+        self.recDir = openedFilename[0][0:-4]
         self.scene.clear()
         # setting the image scaling factor to 0, since the screen has been emptied
         #self.imageScaleLCD.display(0)
@@ -146,23 +158,23 @@ class GoldExtMainGui(QtGui.QMainWindow, Ui_MainWindow):
         self.largeGoldParticleCoordinates = []
         self.smallGoldParticleLcdNumber.display(len(self.smallGoldParticleCoordinates))
         self.largeGoldParticleLcdNumber.display(len(self.largeGoldParticleCoordinates))
-        print '-----'
-        print 'Screen is cleared'
+        print ('-----')
+        print ('Screen is cleared')
 
     # this function loads an image to the given area (500*500 by definition) of the screen
     def openAndVisualizeImage(self):
         # opens the file dialog, to select the desired image file; only files appear with the listed extensions
         global openedFilename # making it global to be accessible for other functions as well
         if(self.recDir != ''):
-            openedFilename = QtGui.QFileDialog.getOpenFileName(self, 'Open file', self.recDir, 'Image Files (*.png *.jpg *.jpeg *.tif)')
+            openedFilename = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', self.recDir, 'Image Files (*.png *.jpg *.jpeg *.tif)')
         else:
-            openedFilename = QtGui.QFileDialog.getOpenFileName(self, 'Open file', '/', 'Image Files (*.png *.jpg *.jpeg *.tif)')
+            openedFilename = QtWidgets.QFileDialog.getOpenFileName(self, 'Open file', '/', 'Image Files (*.png *.jpg *.jpeg *.tif)')
         # creating an object for the file read in
-        img = QtGui.QPixmap(openedFilename)
+        img = QtGui.QPixmap(openedFilename[0])
         # checking if the loaded file is valid
         if(img.width() == 0):
-            print '-----'
-            print 'No image loaded, please choose one to proceed.'
+            print ('-----')
+            print ('No image loaded, please choose one to proceed.')
         # if the image is loaded and valid, go on
         else:
             # rescaling the image so that it fits into the graphics scene
@@ -183,7 +195,8 @@ class GoldExtMainGui(QtGui.QMainWindow, Ui_MainWindow):
 
     # letting the user to draw on the loaded image (synaptic area, gold particles)
     def makeImageDrawable(self):
-        self.imgItem = QtGui.QGraphicsPixmapItem(imgScaled, None, self.scene)
+        self.imgItem = QtWidgets.QGraphicsPixmapItem(imgScaled, None) #self.scene)
+        self.scene.addItem(self.imgItem)
         self.imgItem.mousePressEvent = self.selectScalebarPoints
         #self.imgItem.mouseDoubleClickEvent = self.endOfPolygon
         self.synapticAreaRadioButton.setEnabled(1)
@@ -214,7 +227,7 @@ class GoldExtMainGui(QtGui.QMainWindow, Ui_MainWindow):
         scalebarLine = QtCore.QLineF(array[0].x(), array[0].y(), array[1].x(), array[0].y())
         # adding the scalebar to the scene (visualize it)
         tmpScale = self.scene.addLine(scalebarLine, QtGui.QPen(QtCore.Qt.red))
-        scaleBarString = QtCore.QString('%0.0f nm' % scalebarValue)
+        scaleBarString = str('%0.0f nm' % scalebarValue)
         printedScalebar = self.scene.addText(scaleBarString, QtGui.QFont('', 12))
         # setting the position of the scalebar
         printedScalebar.setPos(array[0].x(), array[0].y())
@@ -222,8 +235,8 @@ class GoldExtMainGui(QtGui.QMainWindow, Ui_MainWindow):
         printedScalebar.setDefaultTextColor(QtCore.Qt.red)
         # calculate the nm to pixel ratio
         self.calculateNmPixelRatio(scalebarLine)
-        print '-----'
-        print 'Scale is set'
+        print ('-----')
+        print ('Scale is set')
         self.scalebarRadioButton.setEnabled(0)
 
     def deleteScalebar(self):
@@ -246,7 +259,7 @@ class GoldExtMainGui(QtGui.QMainWindow, Ui_MainWindow):
         #print scaleBarLengthInPixel
         #print scaleBarLengthInNm
         nmPixelRatio = scaleBarLengthInPixel/scaleBarLengthInNm
-        print '1 pixel = %0.3f nm' % (1.0/nmPixelRatio)
+        print ('1 pixel = %0.3f nm' % (1.0/nmPixelRatio))
 
     # redefining mousPressEvent for synaptic area outline drawing
     def drawSynapticAreaOutline(self, event):
@@ -257,7 +270,7 @@ class GoldExtMainGui(QtGui.QMainWindow, Ui_MainWindow):
     def synapticAreaOutlineSelect(self, event):
         self.synapticAreaOutlinePoints.append(event.pos())
         if(len(self.synapticAreaOutlinePoints) > 1):
-            self.scene.addItem(QtGui.QGraphicsLineItem(QtCore.QLineF(self.synapticAreaOutlinePoints[-2], self.synapticAreaOutlinePoints[-1])))
+            self.scene.addItem(QtWidgets.QGraphicsLineItem(QtCore.QLineF(self.synapticAreaOutlinePoints[-2], self.synapticAreaOutlinePoints[-1])))
         if(len(self.synapticAreaOutlinePoints) > 2):
             self.synapticAreaEndingRadioButton.setEnabled(1)
 
@@ -289,7 +302,8 @@ class GoldExtMainGui(QtGui.QMainWindow, Ui_MainWindow):
             # visualizing the scene
             self.imageLoaderView.setScene(self.scene)
             self.scalebarPoints = tmpScalebarPoints
-            self.imgItem = QtGui.QGraphicsPixmapItem(imgScaled, None, self.scene)
+            self.imgItem = QtWidgets.QGraphicsPixmapItem(imgScaled, None) #, self.scene)
+            self.scene.addItem(self.imgItem)
             self.drawScalebar(self.scalebarPoints, self.scalebarSpinBox.value())
             self.synapticAreaRadioButton.setEnabled(1)
 
@@ -300,9 +314,9 @@ class GoldExtMainGui(QtGui.QMainWindow, Ui_MainWindow):
         global AZarea, totalArea
         AZarea = polyArea/(nmPixelRatio**2)/1e6
         totalArea = imgScaled.width()*imgScaled.height()/(nmPixelRatio**2)/1e6
-        print '-----'
-        print 'AZ area: %0.3f um2' % AZarea
-        print 'Total area: %0.3f um2' % totalArea
+        print ('-----')
+        print ('AZ area: %0.3f um2' % AZarea)
+        print ('Total area: %0.3f um2' % totalArea)
         #print 'Polygon area %0.3f nm2' % (polyArea/(nmPixelRatio**2))
         #print 'Ratio: %0.3f' % (totalArea / AZarea)
         self.synapticAreaOutlinePath = []
@@ -324,9 +338,10 @@ class GoldExtMainGui(QtGui.QMainWindow, Ui_MainWindow):
     def markSmallGoldParticles(self, event):
         self.smallGoldParticleCoordinates.append(event.pos())
         pointDiam = 4
-        tmpEllipse = QtGui.QGraphicsEllipseItem(self.smallGoldParticleCoordinates[-1].x()-pointDiam/2, self.smallGoldParticleCoordinates[-1].y()-pointDiam/2, pointDiam, pointDiam)
+        tmpEllipse = QtWidgets.QGraphicsEllipseItem(self.smallGoldParticleCoordinates[-1].x()-pointDiam/2, self.smallGoldParticleCoordinates[-1].y()-pointDiam/2, pointDiam, pointDiam)
         tmpEllipse.setPen(QtGui.QPen(QtCore.Qt.green, 2))
         self.scene.addItem(tmpEllipse)
+        self.smallGoldParticleItemList.append(tmpEllipse)
         self.smallGoldParticleLcdNumber.display(len(self.smallGoldParticleCoordinates))
 
     # defining the mousePressEvent for drawing small gold particles
@@ -338,17 +353,18 @@ class GoldExtMainGui(QtGui.QMainWindow, Ui_MainWindow):
         if(len(self.smallGoldParticleCoordinates) > 0):
             p = self.smallGoldParticleCoordinates[-1]
             del self.smallGoldParticleCoordinates[-1]
-            self.scene.removeItem(self.scene.itemAt(p.x(), p.y()))
+            self.scene.removeItem(self.smallGoldParticleItemList[-1])
+            del self.smallGoldParticleItemList[-1]
         else:
-            print '----'
-            print 'No more small gold particles located in the active zone'
+            print ('-----')
+            print ('No more small gold particles located in the active zone')
         self.smallGoldParticleLcdNumber.display(len(self.smallGoldParticleCoordinates))
 
     # marking large gold particles on the synaptic area
     def markLargeGoldParticles(self, event):
         self.largeGoldParticleCoordinates.append(event.pos())
         pointDiam = 8
-        tmpEllipse = QtGui.QGraphicsEllipseItem(self.largeGoldParticleCoordinates[-1].x()-pointDiam/2, self.largeGoldParticleCoordinates[-1].y()-pointDiam/2, pointDiam, pointDiam)
+        tmpEllipse =QtWidgets.QGraphicsEllipseItem(self.largeGoldParticleCoordinates[-1].x()-pointDiam/2, self.largeGoldParticleCoordinates[-1].y()-pointDiam/2, pointDiam, pointDiam)
         tmpEllipse.setPen(QtGui.QPen(QtCore.Qt.blue, 2))
         self.scene.addItem(tmpEllipse)
         self.largeGoldParticleLcdNumber.display(len(self.largeGoldParticleCoordinates))
@@ -364,15 +380,15 @@ class GoldExtMainGui(QtGui.QMainWindow, Ui_MainWindow):
             del self.largeGoldParticleCoordinates[-1]
             self.scene.removeItem(self.scene.itemAt(p.x(), p.y()))
         else:
-            print '----'
-            print 'No more large gold particles located in the active zone'
+            print ('-----')
+            print ('No more large gold particles located in the active zone')
         self.largeGoldParticleLcdNumber.display(len(self.largeGoldParticleCoordinates))
 
     def generateRandomSmallData(self):
         self.tmpRandomSmall = []
         if(len(self.smallGoldParticleCoordinates) == 0):
-            print '-----'
-            print 'There are 0 small gold particles labelled, no distribution could be generated'
+            print ('-----')
+            print ('There are 0 small gold particles labelled, no distribution could be generated')
         else:
             # get_extents() function of a path returns the min and max values of x and y coordinates of the path
             self.tmpRandomSmall = GenerateArtificialData.generateSetOfRandomDataPoints(realPath, None, True, len(self.smallGoldParticleCoordinates), 10*nmPixelRatio, realPath.get_extents().x0, realPath.get_extents().x1, realPath.get_extents().y0, realPath.get_extents().y1)
@@ -381,8 +397,8 @@ class GoldExtMainGui(QtGui.QMainWindow, Ui_MainWindow):
     def generateRandomLargeData(self):
         self.tmpRandomLarge = []
         if(len(self.largeGoldParticleCoordinates) == 0):
-            print '-----'
-            print 'There are 0 large gold paricles labelled, no distribution could be generated'
+            print ('-----')
+            print ('There are 0 large gold paricles labelled, no distribution could be generated')
         else:
             self.tmpRandomLarge = GenerateArtificialData.generateSetOfRandomDataPoints(realPath, None, True, len(self.largeGoldParticleCoordinates), 10*nmPixelRatio, realPath.get_extents().x0, realPath.get_extents().x1, realPath.get_extents().y0, realPath.get_extents().y1)
 
@@ -390,14 +406,14 @@ class GoldExtMainGui(QtGui.QMainWindow, Ui_MainWindow):
     def saveImage(self):
         painter = QtGui.QPainter(imgScaled)
         self.scene.render(painter, QtCore.QRectF(0, 0, self.scene.width(), self.scene.height()))
-        saveImageFilename = str(openedFilename[0:-4]) + '_scaled.jpg'
+        saveImageFilename = str(openedFilename[0][0:-4]) + '_scaled.jpg'
         imgScaled.save(saveImageFilename, "JPG")
-        print '-----'
-        print 'Image saved at', saveImageFilename
+        print ('-----')
+        print ('Image saved at', saveImageFilename)
 
     def saveState(self):
         # specifying the filename of the file which contains the saved state (with a .gss extension for easier recognition)
-        savedStateFilename = openedFilename[0:-3] + 'gss'
+        savedStateFilename = openedFilename[0][0:-3] + 'gss'
 
         # searching for the longest array to store data
         maxLength = 0
@@ -456,8 +472,8 @@ class GoldExtMainGui(QtGui.QMainWindow, Ui_MainWindow):
             f.write(s)
 
         f.close()
-        print '-----'
-        print 'State saved at %s' % savedStateFilename
+        print ('-----')
+        print ('State saved at %s' % savedStateFilename)
 
     def openSavedSate(self):
         global globalSynapticAreaOutlinePoints, globalScalebarPoints
@@ -468,11 +484,12 @@ class GoldExtMainGui(QtGui.QMainWindow, Ui_MainWindow):
         self.largeGoldParticleCoordinates = []
 
         # checking if a saved state exists for the given file image; if so, load data and redraw it onto the image
-        tmpFilename =  openedFilename[0:-3] + 'gss'
+        tmpFilename =  openedFilename[0][0:-3] + 'gss'
         if(os.path.isfile(tmpFilename)):
 
             # making the image drawable again
-            self.imgItem = QtGui.QGraphicsPixmapItem(imgScaled, None, self.scene)
+            self.imgItem = QtWidgets.QGraphicsPixmapItem(imgScaled, None) #, self.scene)
+            self.scene.addItem(self.imgItem)
             self.saveStateButton.setEnabled(1)
 
             f = open(tmpFilename, 'r')
@@ -508,14 +525,15 @@ class GoldExtMainGui(QtGui.QMainWindow, Ui_MainWindow):
             # small gold particles
             for i in range(0, len(self.smallGoldParticleCoordinates)):
                 pointDiam = 4
-                tmpEllipse = QtGui.QGraphicsEllipseItem(self.smallGoldParticleCoordinates[i].x()-pointDiam/2, self.smallGoldParticleCoordinates[i].y()-pointDiam/2, pointDiam, pointDiam)
+                tmpEllipse = QtWidgets.QGraphicsEllipseItem(self.smallGoldParticleCoordinates[i].x()-pointDiam/2, self.smallGoldParticleCoordinates[i].y()-pointDiam/2, pointDiam, pointDiam)
                 tmpEllipse.setPen(QtGui.QPen(QtCore.Qt.green, 2))
                 self.scene.addItem(tmpEllipse)
+                self.smallGoldParticleItemList.append(tmpEllipse)
                 self.smallGoldParticleLcdNumber.display(len(self.smallGoldParticleCoordinates))
             # large gold particles
             for i in range(0, len(self.largeGoldParticleCoordinates)):
                 pointDiam = 8
-                tmpEllipse = QtGui.QGraphicsEllipseItem(self.largeGoldParticleCoordinates[i].x()-pointDiam/2, self.largeGoldParticleCoordinates[i].y()-pointDiam/2, pointDiam, pointDiam)
+                tmpEllipse = QtWidgets.QGraphicsEllipseItem(self.largeGoldParticleCoordinates[i].x()-pointDiam/2, self.largeGoldParticleCoordinates[i].y()-pointDiam/2, pointDiam, pointDiam)
                 tmpEllipse.setPen(QtGui.QPen(QtCore.Qt.blue, 2))
                 self.scene.addItem(tmpEllipse)
                 self.largeGoldParticleLcdNumber.display(len(self.largeGoldParticleCoordinates))
@@ -523,11 +541,11 @@ class GoldExtMainGui(QtGui.QMainWindow, Ui_MainWindow):
             global polygonCentroid
             polygonCentroid = DistanceCalculations.calculateGoldParticleCentroid(self.smallGoldParticleCoordinates)
 
-            print '-----'
-            print 'Saved state loaded succesfully'
+            print ('-----')
+            print ('Saved state loaded succesfully')
         else:
-            print '-----'
-            print 'No saved state found for this image'
+            print ('-----')
+            print ('No saved state found for this image')
 
     def experimentalDataCalculations(self):
         self.smallGoldParticleCoordinatesInUm = []
@@ -634,7 +652,7 @@ class GoldExtMainGui(QtGui.QMainWindow, Ui_MainWindow):
         # for spatial autocorrelation on random samples
         maskSize = DistanceCalculations.getSynapticAreaOutlineBorders(self.synapticAreaOutlinePoints)
 
-        with PdfPages(openedFilename[0:-4] + '_random.pdf') as pdf:
+        with PdfPages(openedFilename[0][0:-4] + '_random.pdf') as pdf:
             for i in range(0, self.randomSampleSpinBox.value()):
                 self.generateRandomSmallData()
                 # calling the 2 previously defined function from module 'DistanceCalculations'
@@ -700,19 +718,19 @@ class GoldExtMainGui(QtGui.QMainWindow, Ui_MainWindow):
                     # pixel to um conversion
                     DistanceCalculations.visualizeData(smallNND_matrix, smallPercNND, smallFullMatrix, smallPercFull, largeNND_matrix, largePercNND, largeFullMatrix, largePercFull, realPathInUm, (self.tmpRandomSmall / (nmPixelRatio*1e3)), (self.tmpRandomLarge / (nmPixelRatio*1e3)), pdf, (imgScaled.width() / (nmPixelRatio*1e3)), (imgScaled.height() / (nmPixelRatio*1e3)))
                 if(i == 0):
-                    print '-----'
-                print i+1, '/', self.randomSampleSpinBox.value(), 'done'
+                    print ('-----')
+                print (i+1, '/', self.randomSampleSpinBox.value(), 'done')
 
         if(self.saveRandomDataCheckBox.isChecked() == False):
-            os.remove(str(openedFilename[0:-4] + '_random.pdf'))
+            os.remove(str(openedFilename[0][0:-4] + '_random.pdf'))
 
         # if spatial autocorrelation analysis performed on the random samples, save data
         if(self.PerformSpatialAutocorrelationCheckBox.isChecked() == True):
 
             # check if the 2D ACF is already calculated for the actual experimental data
             if(self.g_r == []):
-                print '-----'
-                print 'Please perform 2D autocorrelation calculation on actual experimental data first'
+                print ('-----')
+                print ('Please perform 2D autocorrelation calculation on actual experimental data first')
             else:
                 pass
 
@@ -735,7 +753,7 @@ class GoldExtMainGui(QtGui.QMainWindow, Ui_MainWindow):
             grIndex = DistanceCalculations.getElementIndex(expMeanGr, randomMeanGr)
 
             # Creating the Excel workbook in which data will be saved
-            workbookFilename = str(openedFilename[0:-4]) + '_2D_ACF.xlsx'
+            workbookFilename = str(openedFilename[0][0:-4]) + '_2D_ACF.xlsx'
             workbook = xw.Workbook(workbookFilename)
 
             self.ACF_radiusVec = self.ACF_radiusVec.tolist()
@@ -743,23 +761,23 @@ class GoldExtMainGui(QtGui.QMainWindow, Ui_MainWindow):
             ExcelSave.saveDataInExcel_2D_ACF(workbook, self.ACF_radiusVec, self.g_r, self.random_g_r, expMeanGr, randomMeanGr, grIndex)
             workbook.close()
 
-            print '-----'
-            print 'Random 2D ACF data is saved at:', workbookFilename
+            print ('-----')
+            print ('Random 2D ACF data is saved at:', workbookFilename)
 
         self.saveData(self.allSmallNNDMatrix, self.allSmallFullMatrix, self.allLargeNNDMatrix, self.allLargeFullMatrix)
 
-        print '-----'
-        print 'N = %0.0f random data sets were generated in %0.3f seconds' % (self.randomSampleSpinBox.value(), float(time.time() - start_time))
+        print ('-----')
+        print ('N = %0.0f random data sets were generated in %0.3f seconds' % (self.randomSampleSpinBox.value(), float(time.time() - start_time)))
 
-        if(os.path.isfile(openedFilename[0:-4] + '_random.pdf')):
-            print '-----'
-            print 'PDF with random data is saved at ' + openedFilename[0:-4] + '_random.pdf'
+        if(os.path.isfile(openedFilename[0][0:-4] + '_random.pdf')):
+            print ('-----')
+            print ('PDF with random data is saved at ' + openedFilename[0][0:-4] + '_random.pdf')
 
     # save generated random data in Excel
     def saveData(self, allSmallNNDMatrix, allSmallFullMatrix, allLargeNNDMatrix, allLargeFullMatrix):
 
         # Creating the Excel workbook in which data will be saved
-        workbookFilename = str(openedFilename[0:-4]) + '_distance_measurements.xlsx'
+        workbookFilename = str(openedFilename[0][0:-4]) + '_distance_measurements.xlsx'
         workbook = xw.Workbook(workbookFilename)
 
         # save data in excel file
@@ -796,8 +814,8 @@ class GoldExtMainGui(QtGui.QMainWindow, Ui_MainWindow):
         ExcelSave.saveDataInExcel_distanceSummary(workbook, self.expSmallNNDMatrix, self.expSmallFullMatrix, self.smallCentroidDistance, self.smallClosestEdgeDistance, self.randomNNDMean, self.randomAllDistanceMean, self.randomCentroidMean, self.randomClosestEdgeMean, NNDIndex, AllDistanceIndex, CentroidIndex, ClosestEdgeIndex, randomNNDMedian, randomAllDistanceMedian, randomCendtroidMedian, randomClosestEdgeMedian, [])
 
         workbook.close()
-        print '-----'
-        print 'Distance measurements data is saved at ', str(openedFilename[0:-4]) + '_distance_measurements.xlsx'
+        print ('-----')
+        print ('Distance measurements data is saved at ', str(openedFilename[0][0:-4]) + '_distance_measurements.xlsx')
 
     def performSpatialAutocorrelation(self):
 
@@ -817,7 +835,7 @@ class GoldExtMainGui(QtGui.QMainWindow, Ui_MainWindow):
 
     def performDBSCAN(self):
         if(len(self.smallGoldParticleCoordinates) < 1):
-            print 'DBSCAN cannot be performed, not enough data points'
+            print ('DBSCAN cannot be performed, not enough data points')
         else:
             epsilonInPixel = self.DBSCANEpsilonDoubleSpinBox.value() * nmPixelRatio
 
@@ -839,7 +857,7 @@ class GoldExtMainGui(QtGui.QMainWindow, Ui_MainWindow):
 
             # transpose the matrix to have the data columnwise and save it with a '_DBSCAN' suffix
             dataMatrix = np.transpose(np.asarray(dataMatrix))
-            filenameToSave = str(openedFilename[0:-4]) + '_DBSCAN_epsilon=' + str(int(self.DBSCANEpsilonDoubleSpinBox.value())) + 'nm_minSample=' + str(int(self.DBSCANMinSampleDoubleSpinBox.value())) + '.txt'
+            filenameToSave = str(openedFilename[0][0:-4]) + '_DBSCAN_epsilon=' + str(int(self.DBSCANEpsilonDoubleSpinBox.value())) + 'nm_minSample=' + str(int(self.DBSCANMinSampleDoubleSpinBox.value())) + '.txt'
             np.savetxt(filenameToSave, dataMatrix, fmt='%0.0f')
 
     def performAffinityPropagation(self):
@@ -860,7 +878,7 @@ class GoldExtMainGui(QtGui.QMainWindow, Ui_MainWindow):
 
         # transpose the matrix to have the data columnwise and save it with a '_affinity_propagation' suffix
         dataMatrix = np.transpose(np.asarray(dataMatrix))
-        filenameToSave = str(openedFilename[0:-4]) + '_affinity_propagation_pref=' + str(int(self.affinityPropagationDoubleSpinBox.value())) + '.txt'
+        filenameToSave = str(openedFilename[0][0:-4]) + '_affinity_propagation_pref=' + str(int(self.affinityPropagationDoubleSpinBox.value())) + '.txt'
         np.savetxt(filenameToSave, dataMatrix, fmt='%0.0f')
 
     def performMeanShift(self):
@@ -881,17 +899,24 @@ class GoldExtMainGui(QtGui.QMainWindow, Ui_MainWindow):
 
         # transpose the matrix to have the data columnwise and save it with a '_mean_shift' suffix
         dataMatrix = np.transpose(np.asarray(dataMatrix))
-        filenameToSave = str(openedFilename[0:-4]) + '_mean_shift_minSample=' + str(int(self.MeanShiftMinSampleDoubleSpinBox.value())) + '.txt'
+        filenameToSave = str(openedFilename[0][0:-4]) + '_mean_shift_minSample=' + str(int(self.MeanShiftMinSampleDoubleSpinBox.value())) + '.txt'
         np.savetxt(filenameToSave, dataMatrix, fmt='%0.0f')
+        
 
     # opening the clustering GUI
     def openClusteringWindowGui(self):
         self._new_window = GoldExtClusterGui()
         self._new_window.show()
+        # opening the clustering GUI
+        
+    def openBivWindowGui(self):
+        # pixel to um conversion
+        self._new_window = GoldExtBivar(self.smallGoldParticleCoordinates,self.largeGoldParticleCoordinates,self.synapticAreaOutlinePoints,nmPixelRatio)
+        self._new_window.show()
 
 # initializing the GUI itself
 def initGUI():
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     mainWindow = GoldExtMainGui()
     mainWindow.show()
     sys.exit(app.exec_())

@@ -25,7 +25,7 @@ from scipy import stats
 import matplotlib.pyplot as plt
 import matplotlib.path as mPath
 import matplotlib.patches as patches
-from PyQt4 import QtCore
+from PyQt5 import QtCore
 
 
 # distance function: calculating the distance between 2 points (type: QtCore.QPointF) based on their X and Y coordinates

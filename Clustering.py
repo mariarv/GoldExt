@@ -26,7 +26,7 @@ from itertools import cycle
 from scipy.stats import sem
 from scipy.spatial import Voronoi
 from matplotlib import cm
-from PyQt4 import QtCore
+from PyQt5 import QtCore
 import DistanceCalculations
 import ClusterGui
 import MainGUI
@@ -69,8 +69,8 @@ def dbscanClustering(array1, array2, array3, epsilon, numberOfMinSamples):
     #for i in range(0, n_clusters_):
     #    print 'element: %0.0f, occurence: %0.0f' % (i, labels.count(i))
 
-    print '-----'
-    print 'Number of clusters: ', n_clusters_
+    print ('-----')
+    print ('Number of clusters: ', n_clusters_)
 
     # visualize data
     # Black removed and is used for noise instead.
@@ -109,8 +109,8 @@ def affinityPropagationClustering(array1, array2, array3, pref):
     labels = af.labels_
 
     n_clusters_ = len(cluster_centers_indices)
-    print '-----'
-    print 'Number of clusters: ', n_clusters_
+    print ('-----')
+    print ('Number of clusters: ', n_clusters_)
 
     fig = plt.figure(figsize = (16,12)) # in inches
 
@@ -185,7 +185,7 @@ def meanShiftClustering(array1, array2, array3, numberOfMinSamples):
     else:
         n_clusters_ = 0
 
-    print("number of estimated clusters : %d" % n_clusters_)
+    print ('number of estimated clusters : %d' % n_clusters_)
 
     fig = plt.figure(figsize = (16,12)) # in inches
     colors = cycle('bgrcmykbgrcmykbgrcmykbgrcmyk')
@@ -396,9 +396,9 @@ def calculateSpatialAutocorrelationFunction(image, maskSize, localizationCoordin
     if(boolSaveData == True):
         # save 2D autocorrelation function into an ASCII file
         if(loc == 0):
-            filename = MainGUI.openedFilename[0:-4] + '_g(r)_rmax' + str(int(np.around(rmax/MainGUI.nmPixelRatio))) + 'nm.dat'
+            filename = MainGUI.openedFilename[0][0:-4] + '_g(r)_rmax' + str(int(np.around(rmax/MainGUI.nmPixelRatio))) + 'nm.dat'
         if(loc == 1):
-            filename = ClusterGui.clusterOpenedFilename[0:-4] + '_g(r)_rmax' + str(int(np.around(rmax/MainGUI.nmPixelRatio))) + 'nm.dat'
+            filename = ClusterGui.clusterOpenedFilename[0][0:-4] + '_g(r)_rmax' + str(int(np.around(rmax/MainGUI.nmPixelRatio))) + 'nm.dat'
         f = open(filename, 'w')
 
         for i in range(0, len(g)):
@@ -407,8 +407,8 @@ def calculateSpatialAutocorrelationFunction(image, maskSize, localizationCoordin
             s = str(value0 + '  ' + value1 + '\n')
             f.write(s)
         f.close()
-        print '-----'
-        print 'g(r) saved at ' + filename
+        print ('-----')
+        print ('g(r) saved at ' + filename)
 
     return [conv_radii, g]
 

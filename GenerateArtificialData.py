@@ -23,7 +23,7 @@ import DistanceCalculations
 import random
 import numpy as np
 #import time
-from PyQt4 import QtCore
+from PyQt5 import QtCore
 
 # generating N number of randomly distributed data points
 def generateRandomData(lowerBound_X, upperBound_X, lowerBound_Y, upperBound_Y):
@@ -48,7 +48,7 @@ def generateSetOfRandomDataPoints(areaPath, polygonPathList, boolWithin, numberO
 
         # if areaPath is not present as an argument, distribute data points within the rectangular area
         if(areaPath == None):
-            tmpDistanceVec = ([])
+            tmpDistanceVec = np.array([])
             for q in range(0, len(pointListWithin)):
                 tmpDistanceVec = np.append(tmpDistanceVec, DistanceCalculations.distance(pointListWithin[q], tmpPoint))
 
@@ -62,10 +62,9 @@ def generateSetOfRandomDataPoints(areaPath, polygonPathList, boolWithin, numberO
         # checking if the data point generated above is within the border the used-defined area
         else:
             if(areaPath.contains_point((tmpPoint.x(), tmpPoint.y()), None, 0.0) == boolWithin):
-                tmpDistanceVec = ([])
+                tmpDistanceVec = np.array([])
                 for q in range(0, len(pointListWithin)):
                     tmpDistanceVec = np.append(tmpDistanceVec, DistanceCalculations.distance(pointListWithin[q], tmpPoint))
-
                 if(polygonPathList == None):
                     if(np.any(pointListWithin == tmpPoint) or np.any(tmpDistanceVec < minDistance)):
                         pass
@@ -84,7 +83,7 @@ def generateSetOfRandomDataPoints(areaPath, polygonPathList, boolWithin, numberO
                     if (np.any(tmpBinaryVec == 1)):
                         pass
                     else:
-                        tmpDistanceVec = ([])
+                        tmpDistanceVec = np.array([])
                         for q in range(0, len(pointListWithin)):
                             tmpDistanceVec = np.append(tmpDistanceVec, DistanceCalculations.distance(pointListWithin[q], tmpPoint))
 
@@ -300,8 +299,8 @@ def randomizeLocalizations(localizationPoints, jitterSD, minDistance, trialNumbe
         if(np.amin(NND) >= minDistance):
             break
         if(trialCounter+1 == trialNumber):
-            print '-----'
-            print 'Cannot create such a distribution in %0.0f trials, original distribution returned' % trialNumber
+            print ('-----')
+            print ('Cannot create such a distribution in %0.0f trials, original distribution returned' % trialNumber)
             return localizationPoints
         else:
             trialCounter += 1
